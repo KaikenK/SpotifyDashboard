@@ -1,0 +1,36 @@
+
+/* Bootstrap */
+@import 'tailwindcss/base';
+@import 'tailwindcss/components';
+@import 'tailwindcss/utilities';
+@import 'bootstrap/dist/css/bootstrap.min.css';
+
+body {
+  background-color: #121212 !important;
+  color: #ffffff !important;
+}
+@import 'bootstrap/dist/css/bootstrap.min.css';
+
+/* Global styles */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  background-color: #121212;
+  color: #ffffff;
+  font-family: 'Circular', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+}
+
+::-webkit-scrollbar {
+  width: 8px;
+}
+::-webkit-scrollbar-track {
+  background: #121212;
+}
+::-webkit-scrollbar-thumb {
+  background: #535353;
+  border-radius: 4px;
+}
