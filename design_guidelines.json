@@ -1,0 +1,149 @@
+{
+  "theme_archetype": {
+    "domain": "Music Artist Dashboard",
+    "theme": "Dark",
+    "archetype_primary": "Archetype 5 (Jewel & Luxury)",
+    "archetype_secondary": "Archetype 2 (Performance Pro)",
+    "rationale": "Spotify's core aesthetic revolves around an immersive, deep dark mode that makes colorful album art and bright green playback actions pop. We are elevating this with 'Jewel & Luxury' (matte, cinematic blacks instead of flat grays) and 'Performance Pro' (sharp, highly legible data grids for artist statistics)."
+  },
+  "color_system": {
+    "background": {
+      "base": "#0A0A0A",
+      "surface": "#121212",
+      "surface_elevated": "#1A1A1A"
+    },
+    "accents": {
+      "primary": "#1ED760",
+      "primary_hover": "#1DB954",
+      "primary_glow": "rgba(30, 215, 96, 0.4)",
+      "destructive": "#E22134",
+      "warning": "#FF9800"
+    },
+    "text": {
+      "primary": "#FFFFFF",
+      "secondary": "#A7A7A7",
+      "muted": "#757575",
+      "inverse": "#000000"
+    },
+    "borders": {
+      "subtle": "rgba(255, 255, 255, 0.08)",
+      "strong": "rgba(255, 255, 255, 0.15)"
+    },
+    "rules": {
+      "hover_states": "Hover states on surfaces should use #1A1A1A. Hover on primary buttons should deepen the green to #1DB954 while text remains #000000 for contrast.",
+      "no_gradients": "Avoid large generic gradients. Use subtle background noise or radial light bleeds using the primary color at 10% opacity in corners for depth."
+    }
+  },
+  "typography": {
+    "font_families": {
+      "headings": "'Outfit', sans-serif",
+      "body": "'Manrope', sans-serif"
+    },
+    "scales": {
+      "h1_hero": "text-4xl sm:text-5xl font-bold tracking-tight text-white",
+      "h2_section": "text-2xl sm:text-3xl font-semibold tracking-tight text-white",
+      "h3_card": "text-xl font-semibold tracking-tight text-white",
+      "h4_label": "text-xs font-bold uppercase tracking-[0.15em] text-secondary",
+      "body_base": "text-sm sm:text-base font-medium text-secondary",
+      "stats_number": "text-3xl sm:text-4xl font-black tracking-tighter text-white"
+    },
+    "rules": {
+      "anti_default": "Never use Inter for headings. Keep headings tightly tracked.",
+      "contrast": "Ensure secondary text (#A7A7A7) passes WCAG AA against the #121212 background."
+    }
+  },
+  "spacing_and_layout": {
+    "global": {
+      "sidebar_width": "w-64",
+      "page_padding": "p-6 md:p-10 lg:p-12",
+      "gap_standard": "gap-6",
+      "bento_gap": "gap-4 md:gap-6"
+    },
+    "dashboard_grid": {
+      "strategy": "MODE B: THE CONTROL ROOM GRID",
+      "structure": "grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-6",
+      "cards": "bg-[#121212] border border-white/10 rounded-xl p-6"
+    },
+    "surface_strategy": {
+      "cards": "Flat background (#121212), sharp 1px border-white/10. No dropshadows. Rely on border contrast.",
+      "navigation": "Solid #0A0A0A background with right border border-white/10.",
+      "player_bar": "GLASSMORPHISM: sticky bottom-0 bg-[#0A0A0A]/80 backdrop-blur-2xl border-t border-white/10 z-50 p-4"
+    }
+  },
+  "components_strategy": {
+    "buttons": {
+      "primary": "Rounded-full bg-[#1ED760] text-black font-bold px-8 py-3 hover:scale-105 hover:bg-[#1DB954] transition-all duration-200",
+      "secondary": "Rounded-full bg-transparent border border-[#A7A7A7] text-white font-bold px-8 py-3 hover:border-white transition-colors duration-200"
+    },
+    "tables": {
+      "structure": "Use Shadcn Table. Remove all column borders, retain subtle row bottom borders (border-white/5).",
+      "hover": "Row hover should highlight with bg-white/5. Add a Play icon appearing on hover for song rows."
+    },
+    "charts": {
+      "library": "Shadcn Charts (Recharts).",
+      "styling": "Use #1ED760 for primary area/line charts. Use a gradient fill (from #1ED760 at 30% opacity to transparent) under the line. Hide standard grid lines, use only subtle Y-axis ticks."
+    },
+    "modals": {
+      "upload": "Use Shadcn Dialog. Overlay must be bg-black/80 backdrop-blur-sm. Dialog window bg-[#121212] border border-white/10."
+    }
+  },
+  "motion_and_interactions": {
+    "page_transitions": "Framer Motion: fade in and translate-y-4 for the main dashboard wrapper.",
+    "list_stagger": "Songs list and dashboard cards must stagger in (0.05s delay per item).",
+    "micro_interactions": {
+      "play_button": "Pulsing animation when song is actively playing.",
+      "hover_card": "Dashboard bento cards lift slightly (-translate-y-1) with a border transition to border-white/20 on hover."
+    }
+  },
+  "image_urls": {
+    "hero_backgrounds": [
+      {
+        "url": "https://static.prod-images.emergentagent.com/jobs/e3f1b5f3-edf8-4447-8100-7d9e488759ef/images/1903349a4f76eff046f22fdd1e977531f0b2dc9a330cb40c9fd10a281a93f2e1.png",
+        "category": "Hero Banner/Abstract Background",
+        "description": "Dark cinematic background texture with glowing neon green soundwave light bleed. Use as a subtle background behind the main dashboard header or artist profile header."
+      }
+    ],
+    "avatars": [
+      {
+        "url": "https://images.pexels.com/photos/8198055/pexels-photo-8198055.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940",
+        "category": "Artist Avatar",
+        "description": "Music producer in studio. Use for the logged-in artist's profile picture."
+      },
+      {
+        "url": "https://images.unsplash.com/photo-1650765814773-d99b321a0124?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjY2NjV8MHwxfHNlYXJjaHwzfHxtdXNpYyUyMHByb2R1Y2VyJTIwc3R1ZGlvJTIwcG9ydHJhaXR8ZW58MHx8fHwxNzc2Njc3MjIwfDA&ixlib=rb-4.1.0&q=85",
+        "category": "Fan/User Avatar",
+        "description": "Person at computer. Use for comments, fan list, or secondary avatars."
+      }
+    ],
+    "album_covers": [
+      {
+        "url": "https://images.unsplash.com/photo-1587659927818-f89edd4db555?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NTY2Nzh8MHwxfHNlYXJjaHw0fHxhYnN0cmFjdCUyMGFsYnVtJTIwY292ZXIlMjBhcnR8ZW58MHx8fHwxNzc2Njc3MjIwfDA&ixlib=rb-4.1.0&q=85",
+        "category": "Song Art 1",
+        "description": "Green and purple abstract light. Use as album art in the Songs Table or Player."
+      },
+      {
+        "url": "https://images.pexels.com/photos/13069544/pexels-photo-13069544.png?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940",
+        "category": "Song Art 2",
+        "description": "Vivid blue and red swirls. Use for top-performing track."
+      },
+      {
+        "url": "https://images.unsplash.com/photo-1642444525640-d3eb287ed389?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NTY2Nzh8MHwxfHNlYXJjaHwzfHxhYnN0cmFjdCUyMGFsYnVtJTIwY292ZXIlMjBhcnR8ZW58MHx8fHwxNzc2Njc3MjIwfDA&ixlib=rb-4.1.0&q=85",
+        "category": "Song Art 3",
+        "description": "Blue and purple geometric abstract. Use for recent uploads."
+      }
+    ]
+  },
+  "instructions_to_main_agent": {
+    "setup": "Install libraries: `yarn add framer-motion recharts lucide-react clsx tailwind-merge`.",
+    "fonts": "Import 'Outfit' and 'Manrope' via Google Fonts in index.css. Apply Manrope to the body, and Outfit to heading classes.",
+    "icons": "Use lucide-react for all standard icons. Make sure playback controls (Play, Pause, Skip) use fill where appropriate (e.g., filled triangle for Play).",
+    "structure": "Create a layout with a fixed left Sidebar (w-64) and a main content area. Add a fixed bottom Player Bar if a song is playing.",
+    "routing": "Ensure dynamic switching between Artist Dashboard (Stats), Songs List, Fan Browse, and Admin tables.",
+    "components": "Use pure HTML/Tailwind for layout containers. Use customized Shadcn for Table, Dialog (Upload Modal), and Select.",
+    "strict_rules": "DO NOT use placeholders like via.placeholder.com. Use ONLY the URLs provided in `image_urls`. Use data-testid attributes on all buttons and actionable items."
+  },
+  "accessibility_and_testing": {
+    "contrast": "All text must pass WCAG AA against its background. Hover states must have text color explicitly set to avoid disappearing text.",
+    "testing_ids": "Every button, input, tab, and song row MUST have a `data-testid` (e.g., `data-testid='upload-song-button'`, `data-testid='play-song-1'`)."
+  }
+}
