@@ -64,10 +64,10 @@ export default function Sidebar({ activeTab, setActiveTab, tabs }) {
       <div className="p-4 border-t border-white/[0.08]">
         <div className="flex items-center gap-3 mb-4 px-2">
           <div className="w-8 h-8 rounded-full bg-spotify-elevated flex items-center justify-center text-xs font-bold text-spotify-green">
-            {user?.username?.[0]?.toUpperCase() || 'U'}
+            {user?.username?.[0]?.toUpperCase() || user?.email?.[0]?.toUpperCase() || 'U'}
           </div>
           <div className="flex-1 min-w-0">
-            <p className="text-sm font-semibold text-white truncate">{user?.username}</p>
+            <p className="text-sm font-semibold text-white truncate">{user?.username || user?.email?.split('@')[0]}</p>
             <p className="text-xs text-spotify-muted truncate">{user?.role}</p>
           </div>
         </div>

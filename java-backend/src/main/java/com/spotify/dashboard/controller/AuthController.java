@@ -34,10 +34,4 @@ public class AuthController {
         String token = authService.login(request.getEmail(), request.getPassword());
         return ResponseEntity.ok(Map.of("token", token));
     }
-
-    @GetMapping("/hash")
-    public ResponseEntity<?> getHash() {
-        String hash = passwordEncoder.encode("password123");
-        return ResponseEntity.ok(Map.of("hash", hash));
-    }
 }

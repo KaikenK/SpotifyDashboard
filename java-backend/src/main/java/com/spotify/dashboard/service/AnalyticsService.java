@@ -71,11 +71,17 @@ public class AnalyticsService {
     private SongAnalytics getOrCreate(Long songId) {
         return analyticsRepository.findBySongId(songId)
                 .orElseGet(() -> {
-                    Song song = songRepository.findById(songId)
-                            .orElseThrow(() -> new RuntimeException("Song not found"));
-                    SongAnalytics analytics = new SongAnalytics();
-                    analytics.setSong(song);
-                    return analyticsRepository.save(analytics);
+                    try {
+                        Song song = songRepository.findById(songId)
+                                .orElseThrow(() -> new RuntimeException("Song not found"));
+                        SongAnalytics analytics = new SongAnalytics();
+                        analytics.setSong(song);
+                        return analyticsRepository.save(analytics);
+                    } catch (org.springframework.dao.DataIntegrityViolationException e) {
+                        // Prevent race condition duplicate creation
+                        return analyticsRepository.findBySongId(songId)
+                                .orElseThrow(() -> new RuntimeException("Wait conflict error"));
+                    }
                 });
     }
 }

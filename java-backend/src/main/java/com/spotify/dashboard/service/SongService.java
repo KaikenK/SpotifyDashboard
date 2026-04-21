@@ -66,7 +66,7 @@ public class SongService {
     }
 
     public List<Song> getPublishedSongs() {
-        return songRepository.findByStatus(Song.SongStatus.ACTIVE);
+        return songRepository.findByStatus(Song.SongStatus.PUBLISHED);
     }
 
     public List<Song> getPendingSongs() {
