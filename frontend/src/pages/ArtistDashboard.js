@@ -9,6 +9,8 @@ const TABS = [
   { id: 'overview', label: 'Overview' },
   { id: 'songs', label: 'My Songs' },
   { id: 'analytics', label: 'Analytics' },
+  { id: 'albums', label: 'Albums' },
+  { id: 'insights', label: 'Insights' },
 ];
 const stagger = { hidden: {}, visible: { transition: { staggerChildren: 0.06 } } };
 const fadeUp = { hidden: { opacity: 0, y: 12 }, visible: { opacity: 1, y: 0, transition: { duration: 0.35 } } };
@@ -174,10 +176,103 @@ function AnalyticsTab({ analytics, chartData, totalPlays, totalLikes, totalComme
   );
 }
 
+function AlbumsTab({ albums, songs, onCreateAlbum, onAssignSong, onLoadAlbumAnalytics, selectedAlbumAnalytics }) {
+  const [title, setTitle] = useState('');
+  const [releaseDate, setReleaseDate] = useState('');
+  const [selectedAlbum, setSelectedAlbum] = useState('');
+  const [selectedSong, setSelectedSong] = useState('');
+
+  return (
+    <motion.div initial="hidden" animate="visible" variants={stagger} className="space-y-6">
+      <motion.div variants={fadeUp} className="bg-spotify-surface border border-white/[0.08] rounded-xl p-5">
+        <h3 className="font-outfit text-lg font-semibold text-white mb-4">Create Album</h3>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+          <input value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Album title" className="bg-spotify-elevated border border-white/[0.1] rounded-lg px-3 py-2 text-sm text-white" />
+          <input value={releaseDate} onChange={(e) => setReleaseDate(e.target.value)} type="date" className="bg-spotify-elevated border border-white/[0.1] rounded-lg px-3 py-2 text-sm text-white" />
+          <button onClick={async () => { await onCreateAlbum({ title, releaseDate }); setTitle(''); setReleaseDate(''); }} className="rounded-lg bg-spotify-green text-black text-sm font-bold px-4 py-2">Create</button>
+        </div>
+      </motion.div>
+
+      <motion.div variants={fadeUp} className="bg-spotify-surface border border-white/[0.08] rounded-xl p-5">
+        <h3 className="font-outfit text-lg font-semibold text-white mb-4">Add Song To Album</h3>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+          <select value={selectedAlbum} onChange={(e) => setSelectedAlbum(e.target.value)} className="bg-spotify-elevated border border-white/[0.1] rounded-lg px-3 py-2 text-sm text-white">
+            <option value="">Select Album</option>
+            {albums.map(a => <option key={a.id} value={a.id}>{a.title}</option>)}
+          </select>
+          <select value={selectedSong} onChange={(e) => setSelectedSong(e.target.value)} className="bg-spotify-elevated border border-white/[0.1] rounded-lg px-3 py-2 text-sm text-white">
+            <option value="">Select Song</option>
+            {songs.map(s => <option key={s.id} value={s.id}>{s.title}</option>)}
+          </select>
+          <button onClick={async () => { if (selectedAlbum && selectedSong) await onAssignSong(selectedAlbum, selectedSong); }} className="rounded-lg border border-white/[0.2] text-white text-sm font-semibold px-4 py-2">Assign</button>
+        </div>
+      </motion.div>
+
+      <motion.div variants={fadeUp} className="bg-spotify-surface border border-white/[0.08] rounded-xl p-5">
+        <h3 className="font-outfit text-lg font-semibold text-white mb-4">Album Analytics</h3>
+        <div className="flex flex-wrap gap-2 mb-4">
+          {albums.map(a => (
+            <button key={a.id} onClick={() => onLoadAlbumAnalytics(a.id)} className="px-3 py-1 rounded-full border border-white/[0.2] text-spotify-text hover:text-white text-xs">{a.title}</button>
+          ))}
+        </div>
+        {selectedAlbumAnalytics && (
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-sm">
+            <div className="bg-spotify-elevated rounded-lg p-3 text-white">Songs: {selectedAlbumAnalytics.totalSongs}</div>
+            <div className="bg-spotify-elevated rounded-lg p-3 text-white">Plays: {fmtNum(selectedAlbumAnalytics.totalPlays)}</div>
+            <div className="bg-spotify-elevated rounded-lg p-3 text-white">Likes: {fmtNum(selectedAlbumAnalytics.totalLikes)}</div>
+            <div className="bg-spotify-elevated rounded-lg p-3 text-white">Engagement: {selectedAlbumAnalytics.averageEngagementScore?.toFixed(1)}</div>
+          </div>
+        )}
+      </motion.div>
+    </motion.div>
+  );
+}
+
+function InsightsTab({ fanInsights, trendPoints }) {
+  return (
+    <motion.div initial="hidden" animate="visible" variants={stagger} className="space-y-6">
+      <motion.div variants={fadeUp} className="bg-spotify-surface border border-white/[0.08] rounded-xl p-6">
+        <h3 className="font-outfit text-lg font-semibold text-white mb-4">Growth Over Time</h3>
+        {trendPoints.length > 0 ? <PerfChart data={trendPoints.map(t => ({ name: t.date.slice(5), plays: t.plays }))} dataKey="plays" gid="gTrend" /> : <p className="text-spotify-muted text-sm">No trend data yet.</p>}
+      </motion.div>
+      <motion.div variants={fadeUp} className="bg-spotify-surface border border-white/[0.08] rounded-xl p-6">
+        <h3 className="font-outfit text-lg font-semibold text-white mb-4">Top Fan Insights</h3>
+        {fanInsights.length === 0 ? <p className="text-spotify-muted text-sm">No fan interaction data yet.</p> : (
+          <div className="space-y-2">
+            {fanInsights.map(f => (
+              <div key={f.fanId} className="flex items-center justify-between bg-spotify-elevated rounded-lg p-3 text-sm">
+                <span className="text-white">{f.fanUsername}</span>
+                <span className="text-spotify-text">Interactions: {f.totalInteractions} (P:{f.playCount} L:{f.likeCount} C:{f.commentCount})</span>
+              </div>
+            ))}
+          </div>
+        )}
+      </motion.div>
+    </motion.div>
+  );
+}
+
 export default function ArtistDashboard() {
   const [activeTab, setActiveTab] = useState('overview');
   const [showUpload, setShowUpload] = useState(false);
-  const { songs, analytics, uploadSong, submitSong, totalPlays, totalLikes, totalComments, totalSaves, chartData } = useArtistData();
+  const {
+    songs,
+    analytics,
+    albums,
+    fanInsights,
+    trendPoints,
+    selectedAlbumAnalytics,
+    uploadSong,
+    submitSong,
+    createAlbum,
+    addSongToAlbum,
+    loadAlbumAnalytics,
+    totalPlays,
+    totalLikes,
+    totalComments,
+    totalSaves,
+    chartData,
+  } = useArtistData();
   return (
     <DashboardLayout activeTab={activeTab} setActiveTab={setActiveTab} tabs={TABS}>
       <div className="p-6 md:p-10 lg:p-12" data-testid="artist-dashboard">
@@ -188,6 +283,8 @@ export default function ArtistDashboard() {
         {activeTab === 'overview' && <OverviewTab songs={songs} analytics={analytics} chartData={chartData} totalPlays={totalPlays} totalLikes={totalLikes} totalComments={totalComments} onSubmit={submitSong} />}
         {activeTab === 'songs' && <SongsTab songs={songs} analytics={analytics} onSubmit={submitSong} />}
         {activeTab === 'analytics' && <AnalyticsTab analytics={analytics} chartData={chartData} totalPlays={totalPlays} totalLikes={totalLikes} totalComments={totalComments} totalSaves={totalSaves} />}
+        {activeTab === 'albums' && <AlbumsTab albums={albums} songs={songs} onCreateAlbum={createAlbum} onAssignSong={addSongToAlbum} onLoadAlbumAnalytics={loadAlbumAnalytics} selectedAlbumAnalytics={selectedAlbumAnalytics} />}
+        {activeTab === 'insights' && <InsightsTab fanInsights={fanInsights} trendPoints={trendPoints} />}
       </div>
       <UploadModal open={showUpload} onClose={() => setShowUpload(false)} onUpload={uploadSong} />
     </DashboardLayout>

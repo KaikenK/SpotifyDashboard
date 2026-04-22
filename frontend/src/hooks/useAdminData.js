@@ -5,6 +5,8 @@ import api from '../api/axios';
 export default function useAdminData() {
   const [pending, setPending] = useState([]);
   const [artists, setArtists] = useState([]);
+  const [comments, setComments] = useState([]);
+  const [report, setReport] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
@@ -12,12 +14,16 @@ export default function useAdminData() {
     setLoading(true);
     setError(null);
     try {
-      const [pendingRes, artistsRes] = await Promise.all([
+      const [pendingRes, artistsRes, commentsRes, reportRes] = await Promise.all([
         api.get('/api/songs/pending'),
         api.get('/api/admin/unverified-artists'),
+        api.get('/api/comments/moderation'),
+        api.get('/api/admin/reports/system'),
       ]);
       setPending(pendingRes.data);
       setArtists(artistsRes.data);
+      setComments(commentsRes.data || []);
+      setReport(reportRes.data || null);
     } catch (err) {
       console.error('Failed to load admin data:', err.message);
       setError('Failed to load admin data.');
@@ -49,5 +55,25 @@ export default function useAdminData() {
     } catch (err) { console.error('Failed to verify:', err.message); }
   }, []);
 
-  return { pending, artists, loading, error, approveSong, rejectSong, verifyArtist };
+  const removeComment = useCallback(async (commentId) => {
+    try {
+      await api.put(`/api/comments/${commentId}/remove`);
+      setComments(prev => prev.filter(c => c.id !== commentId));
+    } catch (err) {
+      console.error('Failed to remove comment:', err.message);
+    }
+  }, []);
+
+  return {
+    pending,
+    artists,
+    comments,
+    report,
+    loading,
+    error,
+    approveSong,
+    rejectSong,
+    verifyArtist,
+    removeComment,
+  };
 }

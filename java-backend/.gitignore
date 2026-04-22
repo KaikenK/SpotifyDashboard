@@ -8,8 +8,8 @@ target/
 .idea/
 *.iml
 src/main/resources/application.properties
-spotify-frontend/node_modules/
-spotify-frontend/dist/
+spotifydb.mv.db
+spotifydb.trace.db
 
 ### STS ###
 .apt_generated

@@ -11,6 +11,10 @@ import api from '../api/axios';
 export default function useArtistData() {
   const [songs, setSongs] = useState([]);
   const [rawAnalytics, setRawAnalytics] = useState([]);
+  const [albums, setAlbums] = useState([]);
+  const [fanInsights, setFanInsights] = useState([]);
+  const [trendPoints, setTrendPoints] = useState([]);
+  const [selectedAlbumAnalytics, setSelectedAlbumAnalytics] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
@@ -18,12 +22,18 @@ export default function useArtistData() {
     setLoading(true);
     setError(null);
     try {
-      const [songsRes, analyticsRes] = await Promise.all([
+      const [songsRes, analyticsRes, albumsRes, fanInsightsRes, trendRes] = await Promise.all([
         api.get('/api/songs/my'),
         api.get('/api/analytics/my'),
+        api.get('/api/albums/my'),
+        api.get('/api/analytics/fan-insights?limit=10'),
+        api.get('/api/analytics/trend?days=14'),
       ]);
       setSongs(songsRes.data);
       setRawAnalytics(analyticsRes.data);
+      setAlbums(albumsRes.data || []);
+      setFanInsights(fanInsightsRes.data || []);
+      setTrendPoints(trendRes.data || []);
     } catch (err) {
       console.error('Failed to load artist data:', err.message);
       setError('Failed to load dashboard data.');
@@ -44,6 +54,26 @@ export default function useArtistData() {
     await api.put(`/api/songs/${songId}/submit`);
     await loadData();
   }, [loadData]);
+
+  const createAlbum = useCallback(async (payload) => {
+    await api.post('/api/albums', payload);
+    await loadData();
+  }, [loadData]);
+
+  const updateAlbum = useCallback(async (albumId, payload) => {
+    await api.put(`/api/albums/${albumId}`, payload);
+    await loadData();
+  }, [loadData]);
+
+  const addSongToAlbum = useCallback(async (albumId, songId) => {
+    await api.put(`/api/albums/${albumId}/songs/${songId}`);
+    await loadData();
+  }, [loadData]);
+
+  const loadAlbumAnalytics = useCallback(async (albumId) => {
+    const { data } = await api.get(`/api/albums/${albumId}/analytics`);
+    setSelectedAlbumAnalytics(data);
+  }, []);
 
   // Normalize: Java SongAnalytics entity → flat shape for UI
   // rawAnalytics[i] = { id, song: {id, title, ...}, totalPlays, totalLikes, ... }
@@ -69,5 +99,25 @@ export default function useArtistData() {
     engagement: a.engagementScore,
   }));
 
-  return { songs, analytics, loading, error, uploadSong, submitSong, totalPlays, totalLikes, totalComments, totalSaves, chartData };
+  return {
+    songs,
+    analytics,
+    albums,
+    fanInsights,
+    trendPoints,
+    selectedAlbumAnalytics,
+    loading,
+    error,
+    uploadSong,
+    submitSong,
+    createAlbum,
+    updateAlbum,
+    addSongToAlbum,
+    loadAlbumAnalytics,
+    totalPlays,
+    totalLikes,
+    totalComments,
+    totalSaves,
+    chartData,
+  };
 }

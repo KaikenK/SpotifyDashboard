@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Play, Heart, Clock, Music2, Search, Pause } from 'lucide-react';
+import { Play, Heart, Clock, Music2, Search, Pause, MessageCircle, UserPlus, Bell } from 'lucide-react';
 import useFanData from '../hooks/useFanData';
 import DashboardLayout from '../components/DashboardLayout';
 
@@ -12,7 +12,27 @@ function fmtDur(sec) { if (!sec) return '--:--'; return `${Math.floor(sec / 60)}
 
 /* Java Song entity fields: song.id, song.title, song.durationSec, song.coverArt, song.artist?.username */
 
-function SongCard({ song, isPlaying, isLiked, onPlay, onLike }) {
+function SongCard({
+  song,
+  isPlaying,
+  isLiked,
+  onPlay,
+  onLike,
+  onComment,
+  onFollow,
+  onSubscribe,
+  followed,
+  subscribed,
+  comments,
+}) {
+  const [comment, setComment] = useState('');
+
+  const submitComment = async () => {
+    if (!comment.trim()) return;
+    await onComment(song.id, comment);
+    setComment('');
+  };
+
   return (
     <motion.div variants={fadeUp} className="bg-spotify-surface border border-white/[0.08] rounded-xl p-4 hover:bg-spotify-elevated hover:border-white/[0.12] transition-all duration-300 group" data-testid={`browse-song-${song.id}`}>
       <div className="relative mb-4">
@@ -24,10 +44,32 @@ function SongCard({ song, isPlaying, isLiked, onPlay, onLike }) {
         {isPlaying && <div className="absolute top-2 left-2 flex items-center gap-1">{[3,4,2,5].map((h,i) => <span key={i} className={`w-0.5 h-${h} bg-spotify-green rounded-full animate-pulse`} style={{ animationDelay: `${i*100}ms` }} />)}</div>}
       </div>
       <h4 className="text-white text-sm font-semibold truncate mb-0.5">{song.title}</h4>
-      <p className="text-spotify-muted text-xs truncate mb-3">{song.artist?.username || 'Unknown Artist'}</p>
+      <p className="text-spotify-muted text-xs truncate mb-3">{song.artistUsername || 'Unknown Artist'}</p>
       <div className="flex items-center justify-between">
         <span className="text-spotify-muted text-xs flex items-center gap-1"><Clock className="w-3 h-3" />{fmtDur(song.durationSec)}</span>
         <button onClick={() => onLike(song.id)} data-testid={`like-song-${song.id}`} className={`p-1.5 rounded-full transition-all duration-200 ${isLiked ? 'text-spotify-green' : 'text-spotify-muted hover:text-white'}`}><Heart className="w-4 h-4" fill={isLiked ? 'currentColor' : 'none'} /></button>
+      </div>
+      <div className="mt-3 flex flex-wrap gap-2">
+        <button onClick={() => onFollow(song.artistId)} className="px-2.5 py-1 rounded-full text-xs border border-white/[0.15] text-spotify-text hover:text-white hover:border-white/[0.3]">
+          <UserPlus className="w-3 h-3 inline mr-1" /> {followed ? 'Following' : 'Follow'}
+        </button>
+        <button onClick={() => onSubscribe(song.artistId, !subscribed)} className={`px-2.5 py-1 rounded-full text-xs ${subscribed ? 'bg-spotify-green/20 text-spotify-green' : 'border border-white/[0.15] text-spotify-text hover:text-white hover:border-white/[0.3]'}`}>
+          <Bell className="w-3 h-3 inline mr-1" /> {subscribed ? 'Subscribed' : 'Subscribe'}
+        </button>
+      </div>
+      <div className="mt-3">
+        <div className="flex items-center gap-2">
+          <input
+            value={comment}
+            onChange={(e) => setComment(e.target.value)}
+            placeholder="Write a comment..."
+            className="flex-1 bg-spotify-elevated border border-white/[0.1] rounded-lg px-2.5 py-1.5 text-xs text-white placeholder:text-spotify-muted"
+          />
+          <button onClick={submitComment} className="px-2.5 py-1.5 rounded-lg bg-spotify-green text-black text-xs font-bold">
+            <MessageCircle className="w-3 h-3 inline mr-1" /> Post
+          </button>
+        </div>
+        <p className="text-[11px] text-spotify-muted mt-2">{(comments || []).length} comments</p>
       </div>
     </motion.div>
   );
@@ -52,7 +94,24 @@ function PlayerBar({ song, isLiked, onLike, onPause }) {
 export default function FanBrowse() {
   const [activeTab, setActiveTab] = useState('browse');
   const [search, setSearch] = useState('');
-  const { songs, playing, setPlaying, likedSongs, loading, handlePlay, handleLike, nowPlaying } = useFanData();
+  const {
+    songs,
+    playing,
+    setPlaying,
+    likedSongs,
+    followedArtists,
+    subscribedArtists,
+    commentsBySong,
+    notifications,
+    loading,
+    handlePlay,
+    handleLike,
+    loadComments,
+    addComment,
+    followArtist,
+    toggleSubscription,
+    nowPlaying,
+  } = useFanData();
   const filtered = songs.filter(s => s.title?.toLowerCase().includes(search.toLowerCase()) || s.artist?.username?.toLowerCase().includes(search.toLowerCase()));
   return (
     <DashboardLayout activeTab={activeTab} setActiveTab={setActiveTab} tabs={TABS}>
@@ -62,8 +121,38 @@ export default function FanBrowse() {
         {loading ? <div className="flex items-center justify-center py-20"><div className="w-8 h-8 border-2 border-spotify-green border-t-transparent rounded-full animate-spin" /></div>
         : filtered.length === 0 ? <div className="text-center py-20"><Music2 className="w-16 h-16 text-spotify-muted mx-auto mb-4" /><p className="text-spotify-text text-lg">No published songs yet</p></div>
         : <motion.div initial="hidden" animate="visible" variants={stagger} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-            {filtered.map(song => <SongCard key={song.id} song={song} isPlaying={playing === song.id} isLiked={likedSongs.has(song.id)} onPlay={handlePlay} onLike={handleLike} />)}
+            {filtered.map(song => <SongCard
+              key={song.id}
+              song={song}
+              isPlaying={playing === song.id}
+              isLiked={likedSongs.has(song.id)}
+              onPlay={handlePlay}
+              onLike={handleLike}
+              onComment={async (songId, content) => {
+                await addComment(songId, content);
+                await loadComments(songId);
+              }}
+              onFollow={followArtist}
+              onSubscribe={toggleSubscription}
+              followed={followedArtists.has(song.artistId)}
+              subscribed={subscribedArtists.has(song.artistId)}
+              comments={commentsBySong[song.id] || []}
+            />)}
           </motion.div>}
+        <div className="mt-8 bg-spotify-surface border border-white/[0.08] rounded-xl p-4">
+          <h3 className="text-white text-sm font-semibold mb-2">Artist Notifications</h3>
+          {notifications.length === 0 ? (
+            <p className="text-xs text-spotify-muted">No notifications yet.</p>
+          ) : (
+            <div className="space-y-2">
+              {notifications.slice(0, 5).map(n => (
+                <div key={n.id} className="text-xs text-spotify-text border-b border-white/[0.06] pb-2">
+                  {n.message}
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
       </div>
       {nowPlaying && <PlayerBar song={nowPlaying} isLiked={likedSongs.has(nowPlaying.id)} onLike={handleLike} onPause={() => setPlaying(null)} />}
     </DashboardLayout>

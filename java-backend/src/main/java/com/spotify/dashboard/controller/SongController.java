@@ -1,5 +1,6 @@
 package com.spotify.dashboard.controller;
 
+import com.spotify.dashboard.dto.SongResponse;
 import com.spotify.dashboard.model.Song;
 import com.spotify.dashboard.model.User;
 import com.spotify.dashboard.service.SongService;
@@ -10,7 +11,6 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Map;
 
 @RestController
 @RequestMapping("/api/songs")
@@ -21,61 +21,67 @@ public class SongController {
 
     // Public — any visitor can see published songs
     @GetMapping("/published")
-    public ResponseEntity<List<Song>> getPublishedSongs() {
-        return ResponseEntity.ok(songService.getPublishedSongs());
+    public ResponseEntity<List<SongResponse>> getPublishedSongs() {
+        return ResponseEntity.ok(songService.getPublishedSongs().stream()
+                .map(SongResponse::fromEntity)
+                .toList());
     }
 
     // Artist — upload a new song
     @PostMapping("/upload")
     @PreAuthorize("hasRole('ARTIST')")
-    public ResponseEntity<?> uploadSong(
+    public ResponseEntity<SongResponse> uploadSong(
             @AuthenticationPrincipal User artist,
             @RequestParam String title,
             @RequestParam Integer durationSec) {
         Song song = songService.uploadSong(artist, title, durationSec, null);
-        return ResponseEntity.ok(song);
+        return ResponseEntity.ok(SongResponse.fromEntity(song));
     }
 
     // Artist — submit song for admin approval
     @PutMapping("/{id}/submit")
     @PreAuthorize("hasRole('ARTIST')")
-    public ResponseEntity<?> submitSong(@PathVariable Long id) {
-        return ResponseEntity.ok(songService.submitForApproval(id));
+    public ResponseEntity<SongResponse> submitSong(@PathVariable Long id) {
+        return ResponseEntity.ok(SongResponse.fromEntity(songService.submitForApproval(id)));
     }
 
     // Artist — get all their own songs
     @GetMapping("/my")
     @PreAuthorize("hasRole('ARTIST')")
-    public ResponseEntity<List<Song>> getMySongs(
+    public ResponseEntity<List<SongResponse>> getMySongs(
             @AuthenticationPrincipal User artist) {
-        return ResponseEntity.ok(songService.getArtistSongs(artist.getId()));
+        return ResponseEntity.ok(songService.getArtistSongs(artist.getId()).stream()
+                .map(SongResponse::fromEntity)
+                .toList());
     }
 
     // Admin — get all songs pending approval
     @GetMapping("/pending")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<List<Song>> getPendingSongs() {
-        return ResponseEntity.ok(songService.getPendingSongs());
+    public ResponseEntity<List<SongResponse>> getPendingSongs() {
+        return ResponseEntity.ok(songService.getPendingSongs().stream()
+                .map(SongResponse::fromEntity)
+                .toList());
     }
 
     // Admin — approve a song
     @PutMapping("/{id}/approve")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<?> approveSong(@PathVariable Long id) {
-        return ResponseEntity.ok(songService.approveSong(id));
+    public ResponseEntity<SongResponse> approveSong(@PathVariable Long id) {
+        return ResponseEntity.ok(SongResponse.fromEntity(songService.approveSong(id)));
     }
 
     // Admin — reject a song
     @PutMapping("/{id}/reject")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<?> rejectSong(@PathVariable Long id) {
-        return ResponseEntity.ok(songService.rejectSong(id));
+    public ResponseEntity<SongResponse> rejectSong(@PathVariable Long id) {
+        return ResponseEntity.ok(SongResponse.fromEntity(songService.rejectSong(id)));
     }
 
     // Admin — unpublish a song
     @PutMapping("/{id}/unpublish")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<?> unpublishSong(@PathVariable Long id) {
-        return ResponseEntity.ok(songService.unpublishSong(id));
+    public ResponseEntity<SongResponse> unpublishSong(@PathVariable Long id) {
+        return ResponseEntity.ok(SongResponse.fromEntity(songService.unpublishSong(id)));
     }
 }

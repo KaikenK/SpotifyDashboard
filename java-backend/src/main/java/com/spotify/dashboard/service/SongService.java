@@ -1,5 +1,8 @@
 package com.spotify.dashboard.service;
 
+import com.spotify.dashboard.exception.BadRequestException;
+import com.spotify.dashboard.exception.NotFoundException;
+import com.spotify.dashboard.exception.UnauthorizedException;
 import com.spotify.dashboard.model.*;
 import com.spotify.dashboard.repository.*;
 import lombok.RequiredArgsConstructor;
@@ -20,10 +23,20 @@ public class SongService {
 
     public Song uploadSong(User artist, String title,
                            Integer durationSec, Album album) {
+        if (artist == null) {
+            throw new UnauthorizedException("Authentication required");
+        }
+        if (title == null || title.isBlank()) {
+            throw new BadRequestException("Song title is required");
+        }
+        if (durationSec != null && durationSec < 0) {
+            throw new BadRequestException("Song duration must be non-negative");
+        }
+
         Song song = new Song();
         song.setArtist(artist);
-        song.setTitle(title);
-        song.setDurationSec(durationSec);
+        song.setTitle(title.trim());
+        song.setDurationSec(durationSec == null ? 0 : durationSec);
         song.setAlbum(album);
         song.setStatus(Song.SongStatus.UPLOADED);
         return songRepository.save(song);
@@ -79,7 +92,7 @@ public class SongService {
 
     public Song getSongById(Long id) {
         return songRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Song not found"));
+                .orElseThrow(() -> new NotFoundException("Song not found"));
     }
 
     private void notifySubscribers(Song song) {

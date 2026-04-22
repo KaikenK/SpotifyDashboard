@@ -4,7 +4,12 @@ import { Shield, CheckCircle2, XCircle, Users, AlertCircle } from 'lucide-react'
 import useAdminData from '../hooks/useAdminData';
 import DashboardLayout from '../components/DashboardLayout';
 
-const TABS = [{ id: 'pending', label: 'Pending Songs' }, { id: 'artists', label: 'Unverified Artists' }];
+const TABS = [
+  { id: 'pending', label: 'Pending Songs' },
+  { id: 'artists', label: 'Unverified Artists' },
+  { id: 'comments', label: 'Moderate Comments' },
+  { id: 'reports', label: 'Reports' },
+];
 const stagger = { hidden: {}, visible: { transition: { staggerChildren: 0.06 } } };
 const fadeUp = { hidden: { opacity: 0, y: 12 }, visible: { opacity: 1, y: 0, transition: { duration: 0.35 } } };
 
@@ -53,7 +58,7 @@ function Empty({ msg }) { return <div className="p-12 text-center"><CheckCircle2
 
 export default function AdminPanel() {
   const [activeTab, setActiveTab] = useState('pending');
-  const { pending, artists, approveSong, rejectSong, verifyArtist } = useAdminData();
+  const { pending, artists, comments, report, approveSong, rejectSong, verifyArtist, removeComment } = useAdminData();
   return (
     <DashboardLayout activeTab={activeTab} setActiveTab={setActiveTab} tabs={TABS}>
       <div className="p-6 md:p-10 lg:p-12" data-testid="admin-panel">
@@ -78,6 +83,45 @@ export default function AdminPanel() {
             <motion.div variants={fadeUp} className="bg-spotify-surface border border-white/[0.08] rounded-xl overflow-hidden">
               <div className="p-5 border-b border-white/[0.05]"><h3 className="font-outfit text-lg font-semibold text-white">Artists Awaiting Verification</h3></div>
               {artists.length === 0 ? <Empty msg="All artists are verified!" /> : <div className="divide-y divide-white/[0.05]">{artists.map(a => <ArtistRow key={a.id} artist={a} onVerify={verifyArtist} />)}</div>}
+            </motion.div>
+          </motion.div>
+        )}
+        {activeTab === 'comments' && (
+          <motion.div initial="hidden" animate="visible" variants={stagger}>
+            <motion.div variants={fadeUp} className="bg-spotify-surface border border-white/[0.08] rounded-xl overflow-hidden">
+              <div className="p-5 border-b border-white/[0.05]"><h3 className="font-outfit text-lg font-semibold text-white">Comment Moderation</h3></div>
+              {comments.length === 0 ? <Empty msg="No active comments to moderate." /> : (
+                <div className="divide-y divide-white/[0.05]">
+                  {comments.map(c => (
+                    <div key={c.id} className="px-5 py-4 flex items-center gap-4">
+                      <div className="flex-1">
+                        <p className="text-white text-sm">{c.content}</p>
+                        <p className="text-spotify-muted text-xs mt-1">Fan: {c.fanUsername}</p>
+                      </div>
+                      <button onClick={() => removeComment(c.id)} className="px-3 py-1.5 rounded-full bg-spotify-destructive/10 text-spotify-destructive text-xs font-bold hover:bg-spotify-destructive/20">Remove</button>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </motion.div>
+          </motion.div>
+        )}
+        {activeTab === 'reports' && (
+          <motion.div initial="hidden" animate="visible" variants={stagger}>
+            <motion.div variants={fadeUp} className="bg-spotify-surface border border-white/[0.08] rounded-xl p-6">
+              <h3 className="font-outfit text-lg font-semibold text-white mb-4">System Report</h3>
+              {!report ? <p className="text-spotify-muted text-sm">Report unavailable.</p> : (
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 text-sm">
+                  <div className="bg-spotify-elevated rounded-lg p-3 text-white">Users: {report.totalUsers}</div>
+                  <div className="bg-spotify-elevated rounded-lg p-3 text-white">Artists: {report.totalArtists}</div>
+                  <div className="bg-spotify-elevated rounded-lg p-3 text-white">Fans: {report.totalFans}</div>
+                  <div className="bg-spotify-elevated rounded-lg p-3 text-white">Songs: {report.totalSongs}</div>
+                  <div className="bg-spotify-elevated rounded-lg p-3 text-white">Published: {report.publishedSongs}</div>
+                  <div className="bg-spotify-elevated rounded-lg p-3 text-white">Pending: {report.pendingSongs}</div>
+                  <div className="bg-spotify-elevated rounded-lg p-3 text-white">Comments: {report.totalComments}</div>
+                  <div className="bg-spotify-elevated rounded-lg p-3 text-white">Subscriptions: {report.activeSubscriptions}</div>
+                </div>
+              )}
             </motion.div>
           </motion.div>
         )}

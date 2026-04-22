@@ -1,5 +1,8 @@
 package com.spotify.dashboard.service;
 
+import com.spotify.dashboard.exception.BadRequestException;
+import com.spotify.dashboard.exception.ConflictException;
+import com.spotify.dashboard.exception.UnauthorizedException;
 import com.spotify.dashboard.model.User;
 import com.spotify.dashboard.repository.UserRepository;
 import com.spotify.dashboard.security.JwtUtil;
@@ -18,10 +21,14 @@ public class AuthService {
     public String register(String username, String email,
                            String password, User.Role role) {
 
+        if (role == null) {
+            throw new BadRequestException("Role is required");
+        }
+
         if (userRepository.existsByEmail(email))
-            throw new RuntimeException("Email already in use");
+            throw new ConflictException("Email already in use");
         if (userRepository.existsByUsername(username))
-            throw new RuntimeException("Username already taken");
+            throw new ConflictException("Username already taken");
 
         User user = new User();
         user.setUsername(username);
@@ -36,13 +43,13 @@ public class AuthService {
 
     public String login(String email, String password) {
         User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new UnauthorizedException("Invalid credentials"));
 
         if (!passwordEncoder.matches(password, user.getPasswordHash()))
-            throw new RuntimeException("Invalid password");
+            throw new UnauthorizedException("Invalid credentials");
 
         if (!user.getIsVerified())
-            throw new RuntimeException("Account pending admin verification");
+            throw new UnauthorizedException("Account pending admin verification");
 
         return jwtUtil.generateToken(user.getEmail(), user.getRole().name());
     }

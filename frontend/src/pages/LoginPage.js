@@ -4,11 +4,13 @@ import { useAuth } from '../context/AuthContext';
 import { motion } from 'framer-motion';
 import { Music, Eye, EyeOff } from 'lucide-react';
 
-function formatApiError(detail) {
-  if (!detail) return 'Something went wrong. Please try again.';
-  if (typeof detail === 'string') return detail;
-  if (Array.isArray(detail)) return detail.map(e => e?.msg || JSON.stringify(e)).join(' ');
-  return String(detail);
+function formatApiError(payload) {
+  if (!payload) return 'Something went wrong. Please try again.';
+  if (typeof payload === 'string') return payload;
+  if (Array.isArray(payload.detail)) return payload.detail.map(e => e?.msg || JSON.stringify(e)).join(' ');
+  if (typeof payload.detail === 'string') return payload.detail;
+  if (typeof payload.message === 'string') return payload.message;
+  return String(payload);
 }
 
 export default function LoginPage() {
@@ -26,7 +28,7 @@ export default function LoginPage() {
     try {
       await login(email, password);
     } catch (err) {
-      setError(formatApiError(err.response?.data?.detail) || err.message);
+      setError(formatApiError(err.response?.data) || err.message);
     } finally {
       setLoading(false);
     }

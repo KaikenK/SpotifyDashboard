@@ -1,6 +1,6 @@
 import React from 'react';
 import { useAuth } from '../context/AuthContext';
-import { Home, Music, BarChart3, Settings, LogOut, Shield, Users, Radio } from 'lucide-react';
+import { Home, Music, BarChart3, Settings, LogOut, Shield, Users, Radio, Disc3, LineChart, MessageSquare, FileBarChart2 } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 export default function Sidebar({ activeTab, setActiveTab, tabs }) {
@@ -13,6 +13,10 @@ export default function Sidebar({ activeTab, setActiveTab, tabs }) {
     browse: Radio,
     pending: Shield,
     artists: Users,
+    albums: Disc3,
+    insights: LineChart,
+    comments: MessageSquare,
+    reports: FileBarChart2,
     settings: Settings,
   };
 
